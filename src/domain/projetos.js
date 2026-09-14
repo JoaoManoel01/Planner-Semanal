@@ -112,3 +112,40 @@ export function ordenarProjetos(projetos, hoje = hojeISO()) {
     return a.nome.localeCompare(b.nome, "pt-BR");
   });
 }
+
+/* ── Quadro ──────────────────────────────────────────────────────── */
+
+export const COLUNAS_PADRAO = [
+  { id: "fazer", nome: "A fazer" },
+  { id: "fazendo", nome: "Fazendo" },
+  { id: "feito", nome: "Feito" }
+];
+
+export function colunasDo(projeto) {
+  return projeto?.quadro?.colunas?.length ? projeto.quadro.colunas : COLUNAS_PADRAO;
+}
+
+export function cartoesDaColuna(projeto, colunaId) {
+  return (projeto?.quadro?.cartoes || [])
+    .filter(c => c.colunaId === colunaId)
+    .sort((a, b) => a.ordem - b.ordem);
+}
+
+/** Cartões com prazo próprio, para a visão de prazos. */
+export function cartoesComPrazo(projeto, hoje = hojeISO()) {
+  return (projeto?.quadro?.cartoes || [])
+    .filter(c => c.prazo)
+    .map(c => ({ ...c, dias: diasEntre(hoje, c.prazo), atrasado: diasEntre(hoje, c.prazo) < 0 }))
+    .sort((a, b) => (a.prazo < b.prazo ? -1 : 1));
+}
+
+/** Progresso do quadro: o que está na última coluna conta como concluído. */
+export function progressoDoQuadro(projeto) {
+  const cartoes = projeto?.quadro?.cartoes || [];
+  if (!cartoes.length) return { feitos: 0, total: 0, fracao: null };
+
+  const colunas = colunasDo(projeto);
+  const ultima = colunas[colunas.length - 1].id;
+  const feitos = cartoes.filter(c => c.colunaId === ultima).length;
+  return { feitos, total: cartoes.length, fracao: feitos / cartoes.length };
+}

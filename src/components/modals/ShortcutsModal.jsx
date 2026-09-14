@@ -1,6 +1,8 @@
 import Modal from "../ui/Modal.jsx";
 
 const ATALHOS = [
+  { teclas: ["1", "2", "3"], acao: "Ir para Agenda, Treinos ou Projetos" },
+  { teclas: ["?"], acao: "Abrir esta lista" },
   { teclas: ["N"], acao: "Nova atividade" },
   { teclas: ["E"], acao: "Novo evento temporal" },
   { teclas: ["T"], acao: "Voltar para a semana de hoje" },

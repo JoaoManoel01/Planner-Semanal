@@ -6,6 +6,8 @@ import { formatarPercentual, direcao } from "../ui/numeros.js";
 import Segmentado from "../ui/Segmentado.jsx";
 import { IconPlus, IconTrash, IconCheck } from "../ui/Icon.jsx";
 import CurvaInvestimento from "./CurvaInvestimento.jsx";
+import Quadro from "./Quadro.jsx";
+import Notas from "./Notas.jsx";
 
 /* ── Faixa de status ─────────────────────────────────────────────── */
 
@@ -233,12 +235,32 @@ function Registros({ projeto }) {
 
 /* ── Workspace ───────────────────────────────────────────────────── */
 
+const VISOES = [
+  { id: "geral", nome: "Visão geral" },
+  { id: "quadro", nome: "Quadro" },
+  { id: "notas", nome: "Notas" }
+];
+
 export default function ProjetoWorkspace({ projeto }) {
+  const [visao, setVisao] = useState("geral");
   const resumo = resumoDoProjeto(projeto);
 
   return (
     <>
       <StatusProjeto resumo={resumo} />
+
+      <Segmentado itens={VISOES} valor={visao} onMudar={setVisao} rotulo="Seções do projeto" />
+
+      {visao === "quadro" && <Quadro projeto={projeto} />}
+      {visao === "notas" && <Notas projeto={projeto} />}
+      {visao === "geral" && <VisaoGeral projeto={projeto} resumo={resumo} />}
+    </>
+  );
+}
+
+function VisaoGeral({ projeto, resumo }) {
+  return (
+    <>
 
       <section className="projeto-card">
         <header className="card-topo">
