@@ -8,7 +8,7 @@ import {
   toMin, toHHMM, formatarHoras,
   getWeekStartISO, deslocarISO, hojeISO, dataParaISO,
   getWeekRange, DIAS_SEMANA
-} from "./domain/time.js";
+} from "../domain/time.js";
 
 const CHAVE = "orbit:agenda:v4";
 const CHAVES_LEGADAS = ["agenda-semanal:v3", "agenda-semanal:v2"];

@@ -1,4 +1,4 @@
-import * as store from "../../agenda.js";
+import * as store from "../../store/agenda.js";
 import { IconPlus, IconTrash } from "../ui/Icon.jsx";
 import Modal from "./Modal.jsx";
 

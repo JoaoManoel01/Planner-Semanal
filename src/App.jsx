@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import * as store from "./agenda.js";
+import * as store from "./store/agenda.js";
 import { useAgenda } from "./hooks/useAgenda.js";
 import { useNow, minutosDoDia } from "./hooks/useNow.js";
 import { useAtalhos } from "./hooks/useAtalhos.js";

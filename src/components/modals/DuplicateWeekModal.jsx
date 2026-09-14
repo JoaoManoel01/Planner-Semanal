@@ -1,4 +1,4 @@
-import * as store from "../../agenda.js";
+import * as store from "../../store/agenda.js";
 import { getWeekRange } from "../../domain/time.js";
 import { pedirConfirmacao, avisar } from "../ui/avisos.js";
 import Modal from "./Modal.jsx";

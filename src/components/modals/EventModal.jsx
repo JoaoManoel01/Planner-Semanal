@@ -1,5 +1,5 @@
 import { useState } from "react";
-import * as store from "../../agenda.js";
+import * as store from "../../store/agenda.js";
 import { IconTrash } from "../ui/Icon.jsx";
 import { avisar } from "../ui/avisos.js";
 import Modal from "./Modal.jsx";

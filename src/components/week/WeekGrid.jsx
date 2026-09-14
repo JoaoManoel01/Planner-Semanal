@@ -1,5 +1,5 @@
 import { Fragment, useLayoutEffect, useRef, useState } from "react";
-import * as store from "../../agenda.js";
+import * as store from "../../store/agenda.js";
 import { toHHMM, toMin, getCurrentTimePosition } from "../../domain/time.js";
 import { IconPlus } from "../ui/Icon.jsx";
 import { pedirConfirmacao, avisar } from "../ui/avisos.js";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import * as store from "../agenda.js";
+import * as store from "../store/agenda.js";
 
 /**
  * Assina o store da aplicação.

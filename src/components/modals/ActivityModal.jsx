@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import * as store from "../../agenda.js";
+import * as store from "../../store/agenda.js";
 import { toMin, formatarHoras, DIAS_CURTOS } from "../../domain/time.js";
 import { IconTrash } from "../ui/Icon.jsx";
 import { pedirConfirmacao, avisar } from "../ui/avisos.js";
