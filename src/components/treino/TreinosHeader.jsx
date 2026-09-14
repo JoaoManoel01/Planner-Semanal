@@ -1,18 +1,21 @@
 import {
-  IconChevronLeft, IconChevronRight, IconPlus, IconTag,
-  IconSliders, IconDownload, IconUpload, IconKeyboard, IconCalendar, IconCopy
+  IconChevronLeft, IconChevronRight, IconPlus, IconSliders,
+  IconDownload, IconUpload, IconKeyboard
 } from "../ui/Icon.jsx";
-import BrandRow from "./BrandRow.jsx";
-import MenuFerramentas from "./MenuFerramentas.jsx";
+import BrandRow from "../layout/BrandRow.jsx";
+import MenuFerramentas from "../layout/MenuFerramentas.jsx";
 
-export default function AppHeader({
-  aba, onAba, range, status, onNavegar, onHoje, onNova, onNovoEvento,
-  onCategorias, onPersonalizar, onExportar, onImportar, onDuplicar, onAtalhos
+/**
+ * Cabeçalho do módulo Treinos.
+ * Mesma estrutura do cabeçalho da agenda: marca + módulo, depois período + ação.
+ * A semana é o eixo do módulo inteiro — não de cada visão isolada.
+ */
+export default function TreinosHeader({
+  aba, onAba, range, status, onNavegar, onHoje, onRegistrar,
+  onPersonalizar, onExportar, onImportar, onAtalhos
 }) {
   const ferramentas = [
-    { id: "evento", rotulo: "Novo evento temporal", icone: IconCalendar, onClick: onNovoEvento },
-    { id: "duplicar", rotulo: "Repetir outra semana aqui", icone: IconCopy, onClick: onDuplicar },
-    { id: "exportar", rotulo: "Exportar dados", icone: IconDownload, onClick: onExportar, separador: true },
+    { id: "exportar", rotulo: "Exportar dados", icone: IconDownload, onClick: onExportar },
     { id: "importar", rotulo: "Importar dados", icone: IconUpload, onClick: onImportar },
     { id: "atalhos", rotulo: "Atalhos de teclado", icone: IconKeyboard, onClick: onAtalhos, separador: true }
   ];
@@ -20,9 +23,6 @@ export default function AppHeader({
   return (
     <header className="cabecalho">
       <BrandRow aba={aba} onAba={onAba}>
-        <button type="button" className="btn btn-ghost" onClick={onCategorias}>
-          <IconTag />Categorias
-        </button>
         <button type="button" className="btn btn-ghost" onClick={onPersonalizar}>
           <IconSliders />Personalizar
         </button>
@@ -58,8 +58,8 @@ export default function AppHeader({
           </div>
         </div>
 
-        <button type="button" className="btn btn-primary" onClick={onNova}>
-          <IconPlus />Nova atividade
+        <button type="button" className="btn btn-primary" onClick={onRegistrar}>
+          <IconPlus />Registrar treino
         </button>
       </div>
     </header>

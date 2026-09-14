@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as store from "./store/agenda.js";
+import * as treinosStore from "./store/treinos.js";
+import * as projetosStore from "./store/projetos.js";
 import { useAgenda } from "./hooks/useAgenda.js";
 import { useNow, minutosDoDia } from "./hooks/useNow.js";
 import { useAtalhos } from "./hooks/useAtalhos.js";
@@ -25,6 +27,8 @@ import CategoriesModal from "./components/modals/CategoriesModal.jsx";
 import PreferencesModal from "./components/modals/PreferencesModal.jsx";
 import ShortcutsModal from "./components/modals/ShortcutsModal.jsx";
 import DuplicateWeekModal from "./components/modals/DuplicateWeekModal.jsx";
+import TreinosApp from "./components/treino/TreinosApp.jsx";
+import ProjetosApp from "./components/projeto/ProjetosApp.jsx";
 
 const PREFS_KEY = "orbit:prefs:v1";
 const PREFS_PADRAO = { tema: "escuro", acento: "cyan", densidade: "normal" };
@@ -48,6 +52,7 @@ export default function App() {
   const [splashFechado, setSplashFechado] = useState(false);
   const [transicao, setTransicao] = useState(null);
   const importRef = useRef(null);
+  const [aba, setAba] = useState("agenda");
 
   const hoje = dataParaISO(agora);
   const semanaAtual = estado.semanaAtual;
@@ -116,7 +121,13 @@ export default function App() {
   }, [transicao, semanaAtual]);
 
   function exportar() {
-    const blob = new Blob([store.exportarJSON()], { type: "application/json" });
+    const backup = {
+      versaoBackup: 3,
+      agenda: store.getEstado(),
+      treinos: treinosStore.getEstado(),
+      projetos: projetosStore.getEstado()
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -132,7 +143,15 @@ export default function App() {
     const leitor = new FileReader();
     leitor.onload = () => {
       try {
-        store.importarJSON(leitor.result);
+        const obj = JSON.parse(leitor.result);
+        /* Versões antigas continuam válidas: o que o backup não traz fica como está. */
+        if (obj?.versaoBackup >= 2 && obj.agenda) {
+          store.importarJSON(JSON.stringify(obj.agenda));
+          if (obj.treinos) treinosStore.importarJSON(JSON.stringify(obj.treinos));
+          if (obj.projetos) projetosStore.importarJSON(JSON.stringify(obj.projetos));
+        } else {
+          store.importarJSON(leitor.result);
+        }
         avisar("Dados importados");
       } catch {
         avisar("Arquivo inválido — use um backup exportado por esta agenda", { tipo: "erro", duracao: 5000 });
@@ -175,72 +194,92 @@ export default function App() {
     " ": () => selecionado && store.alternarFeito(selecionado)
   }), [selecionado, range, status]);
 
-  useAtalhos(atalhos, !dialogo && splashFechado);
+  useAtalhos(atalhos, !dialogo && splashFechado && aba === "agenda");
 
   const dataPadraoEvento = range.dias.find(d => d.hoje)?.iso || range.inicioISO;
 
   return (
     <>
       <div className="app" data-transicao={transicao || undefined}>
-        <AppHeader
-          range={range}
-          status={status}
-          onNavegar={navegar}
-          onHoje={irParaHoje}
-          onNova={() => setDialogo({ tipo: "atividade", diaIdx: range.dias.find(d => d.hoje)?.index ?? 0, blocoId: null })}
-          onNovoEvento={() => setDialogo({ tipo: "evento", evento: null })}
-          onCategorias={() => setDialogo({ tipo: "categorias" })}
-          onPersonalizar={() => setDialogo({ tipo: "prefs" })}
-          onDuplicar={() => setDialogo({ tipo: "duplicar" })}
-          onExportar={exportar}
-          onImportar={() => importRef.current?.click()}
-          onAtalhos={() => setDialogo({ tipo: "atalhos" })}
-        />
-
         <input ref={importRef} type="file" accept="application/json" hidden onChange={importar} />
 
-        <div className="conteudo" key={semanaAtual}>
-          <WeeklyStatus summary={summary} decorrido={decorrido} />
+        {aba === "agenda" ? (
+          <>
+            <AppHeader
+              aba={aba}
+              onAba={setAba}
+              range={range}
+              status={status}
+              onNavegar={navegar}
+              onHoje={irParaHoje}
+              onNova={() => setDialogo({ tipo: "atividade", diaIdx: range.dias.find(d => d.hoje)?.index ?? 0, blocoId: null })}
+              onNovoEvento={() => setDialogo({ tipo: "evento", evento: null })}
+              onCategorias={() => setDialogo({ tipo: "categorias" })}
+              onPersonalizar={() => setDialogo({ tipo: "prefs" })}
+              onDuplicar={() => setDialogo({ tipo: "duplicar" })}
+              onExportar={exportar}
+              onImportar={() => importRef.current?.click()}
+              onAtalhos={() => setDialogo({ tipo: "atalhos" })}
+            />
 
-          <WeekContext
-            eventos={eventos}
-            contextItems={contextItems}
-            onNovo={() => setDialogo({ tipo: "evento", evento: null })}
-            onEditar={evento => setDialogo({ tipo: "evento", evento })}
-            onExcluir={id => store.excluirEvento(id)}
-          />
+            <div className="conteudo" key={semanaAtual}>
+              <WeeklyStatus summary={summary} decorrido={decorrido} />
 
-          <CategoryBar
-            categorias={estado.categorias}
-            porCategoria={summary.porCategoria}
-            filtro={filtro}
-            onAlternar={alternarFiltro}
-            onLimpar={() => setFiltro(new Set())}
-          />
+              <WeekContext
+                eventos={eventos}
+                contextItems={contextItems}
+                onNovo={() => setDialogo({ tipo: "evento", evento: null })}
+                onEditar={evento => setDialogo({ tipo: "evento", evento })}
+                onExcluir={id => store.excluirEvento(id)}
+              />
 
-          <WeekGrid
-            range={range}
-            dias={estado.semanas[semanaAtual].dias}
-            categorias={estado.categorias}
-            densidade={prefs.densidade}
-            filtro={filtro}
-            conflitos={conflitos}
-            selecionado={selecionado}
-            agora={agora}
-            onSelecionar={setSelecionado}
-            onEditar={(diaIdx, blocoId) => setDialogo({ tipo: "atividade", diaIdx, blocoId })}
-            onAdicionar={diaIdx => setDialogo({ tipo: "atividade", diaIdx, blocoId: null })}
-          />
+              <CategoryBar
+                categorias={estado.categorias}
+                porCategoria={summary.porCategoria}
+                filtro={filtro}
+                onAlternar={alternarFiltro}
+                onLimpar={() => setFiltro(new Set())}
+              />
 
-          <div className="camada-interpretacao">
-            <WeekSummary summary={summary} />
-            <WeekInsights insights={insights} />
-          </div>
+              <WeekGrid
+                range={range}
+                dias={estado.semanas[semanaAtual].dias}
+                categorias={estado.categorias}
+                densidade={prefs.densidade}
+                filtro={filtro}
+                conflitos={conflitos}
+                selecionado={selecionado}
+                agora={agora}
+                onSelecionar={setSelecionado}
+                onEditar={(diaIdx, blocoId) => setDialogo({ tipo: "atividade", diaIdx, blocoId })}
+                onAdicionar={diaIdx => setDialogo({ tipo: "atividade", diaIdx, blocoId: null })}
+              />
 
-          <p className="rodape-dica">
-            Arraste para reagendar · duplo clique para editar · <kbd>N</kbd> nova atividade · <kbd>←</kbd> <kbd>→</kbd> semanas
-          </p>
-        </div>
+              <div className="camada-interpretacao">
+                <WeekSummary summary={summary} />
+                <WeekInsights insights={insights} />
+              </div>
+
+              <p className="rodape-dica">
+                Arraste para reagendar · duplo clique para editar · <kbd>N</kbd> nova atividade · <kbd>←</kbd> <kbd>→</kbd> semanas
+              </p>
+            </div>
+          </>
+        ) : (
+          (() => {
+            const Modulo = aba === "treinos" ? TreinosApp : ProjetosApp;
+            return (
+              <Modulo
+                aba={aba}
+                onAba={setAba}
+                onPersonalizar={() => setDialogo({ tipo: "prefs" })}
+                onExportar={exportar}
+                onImportar={() => importRef.current?.click()}
+                onAtalhos={() => setDialogo({ tipo: "atalhos" })}
+              />
+            );
+          })()
+        )}
       </div>
 
       {dialogo?.tipo === "atividade" && (
