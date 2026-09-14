@@ -1481,7 +1481,49 @@ Se sim:
 
 ### Isso não pertence a nenhuma dessas três áreas?
 
-Antes de criar uma nova seção, reavaliar a necessidade.
+→ pode ser um **módulo próprio**.
+
+---
+
+## 43.1 Módulos (revisão)
+
+As três perguntas acima nasceram quando o produto era só a agenda, e davam a
+entender que tudo o que não coubesse nela deveria ser reavaliado. O produto
+cresceu em outro eixo, e a regra precisa acompanhar.
+
+Existem dois eixos:
+
+```text
+HORIZONTAL — o tempo passando
+  A agenda. Uma semana por vez.
+  Responde: o que acontece na terça?
+
+VERTICAL — uma atividade em profundidade
+  Treinos, Projetos. Atravessam semanas.
+  Responde: estou evoluindo? quanto investi nisso?
+```
+
+Um recurso vira módulo próprio quando tem **história própria ao longo do tempo**
+e é consultado fora do contexto de uma semana específica. Progressão de carga e
+tempo investido em pesquisa são assim: ninguém pergunta "quanto eu progredi na
+semana de 14 de setembro", pergunta "estou progredindo".
+
+### Regras de um módulo
+
+1. Pasta própria em `components/`, domínio próprio em `domain/`, store próprio.
+2. **Nenhum módulo lê o dado do outro.** A agenda não importa treinos; treinos
+   não importa projetos. Se dois módulos precisarem do mesmo cálculo, ele desce
+   para `domain/` como função pura, sem estado.
+3. O que for compartilhado sobe para `components/ui` ou `components/layout` —
+   e só quando o **segundo** módulo precisar. Abstrair no primeiro uso é chute.
+4. Todos os módulos usam a mesma casca: `BrandRow` + linha de contexto com
+   período e ação primária. Um módulo não inventa navegação nova.
+
+### O que continua valendo
+
+Criar módulo é caro: mais superfície, mais estado, mais coisa para manter
+coerente. Antes de criar o quarto, verifique se ele não é uma visão dentro de
+um dos três.
 
 ---
 

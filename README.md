@@ -67,6 +67,8 @@ npm run electron:dev
 - **Workspace por projeto** — cada atividade é um espaço próprio, isolado da semana.
 - **Marcos** com data (entregas, submissões, bancas) e aviso de atraso.
 - **Registro de trabalho**: data, tempo e o que avançou.
+- **Quadro** com colunas A fazer / Fazendo / Feito e arraste entre elas. Um cartão pode apontar para um marco em vez de carregar data própria — uma espinha só de prazos, sem duas listas de datas que divergem.
+- **Notas** em texto puro, salvas enquanto você digita.
 - **Curva de investimento** com barras de ritmo semanal sobre a linha do acumulado. As duas leituras juntas de propósito: sozinho, o acumulado nunca acusa abandono, porque só sobe.
 
 ### Aparência
@@ -82,9 +84,11 @@ npm run electron:dev
 
 Tudo fica **no seu computador**, em `localStorage`, separado por módulo (`orbit:agenda:v4`, `orbit:treinos:v1`, `orbit:projetos:v1`). O aplicativo não faz nenhuma chamada de rede: não há servidor, conta, sincronização ou telemetria.
 
-Isso tem duas consequências práticas:
+Isso tem consequências práticas:
 
-- **Backup é com você.** Exporte pelo menu de ferramentas — sai um JSON com os três módulos (`versaoBackup: 3`). A importação aceita backups nas versões 2 e 3, e o que o arquivo não trouxer permanece intacto.
+- **Backup automático diário.** Rodando como aplicativo, o ORBIT grava uma cópia por dia em `Documentos/ORBIT/backups`, mantendo as últimas 14. A pasta Documentos costuma estar sincronizada no Windows, então a cópia sai da máquina sozinha — backup no mesmo disco do original só protege contra engano, não contra perda do disco.
+- **Backup manual quando quiser.** Exporte pelo menu de ferramentas: um JSON com os três módulos (`versaoBackup: 3`). A importação aceita as versões 2 e 3, e o que o arquivo não trouxer permanece intacto.
+- **Dado ilegível não é apagado.** Se o armazenamento corromper, o conteúdo suspeito vai para uma chave de quarentena antes de qualquer escrita nova, e o app avisa. Falha de gravação por cota cheia também aparece na tela, em vez de passar em silêncio.
 - **O backup contém tudo.** Agenda, treinos e projetos em texto puro. Trate o arquivo como documento pessoal.
 
 Instalar em outra máquina começa do zero: os dados não viajam junto com o aplicativo.
@@ -107,6 +111,7 @@ npm run preview        # serve o build de produção
 npm run electron:dev   # aplicativo Electron em desenvolvimento
 npm run electron:build # empacota em %LOCALAPPDATA%/orbit-release (fora do OneDrive)
 npm run icon           # regenera os ícones
+npm test               # testes do domínio e da persistência
 ```
 
 > O build do Electron sai fora da pasta do projeto de propósito: quando a saída fica dentro de uma pasta sincronizada pelo OneDrive, o rename de `win-unpacked` falha com `EPERM` e o empacotamento morre no meio.
@@ -129,7 +134,7 @@ A tag dispara [`.github/workflows/release.yml`](.github/workflows/release.yml), 
 ```text
 .
 ├── docs/                # imagens do repositório
-├── electron/            # camada desktop (janela, updater)
+├── electron/            # camada desktop (janela, updater, backup em disco)
 ├── legacy/              # versão anterior em JS puro (referência)
 ├── scripts/             # utilitários (geração de ícones)
 ├── build/               # ícones do aplicativo
@@ -147,6 +152,8 @@ A tag dispara [`.github/workflows/release.yml`](.github/workflows/release.yml), 
     │   └── ui/          # primitivas: ícones, modal, gráfico, segmentado, avisos
     ├── domain/          # regras puras (tempo, semana, insights, treinos, projetos)
     ├── store/           # estado, ações e persistência — um store por módulo
+    │                    #   persistencia.js: quarentena e falha anunciada
+    │                    #   backup.js: formato único de exportação e cópia diária
     ├── hooks/           # relógio, atalhos e assinatura dos stores
     └── styles/          # tokens e estilos por área
 ```
@@ -160,3 +167,18 @@ Cada módulo é uma pasta em `components/` com o seu domínio e o seu store. Os 
 A identidade visual e as regras de implementação estão em [`brandkit.md`](brandkit.md): tokens, escala tipográfica, geometria dos ícones, espaçamento, movimento e o critério do que é considerado visualmente pronto.
 
 Resumo do DNA: **escuro, petról, cyan, preciso**. Função acima de decoração, informação acima de ornamento, animação rápida e discreta.
+
+## Testes
+
+```bash
+npm test
+```
+
+Cobrem o `domain/` — funções puras, onde o erro é invisível: se `diasEntre`
+errar na virada de mês, a tela continua desenhando, só que com o número errado.
+E cobrem a persistência, onde o comportamento crítico é um só: **estado ilegível
+nunca pode ser sobrescrito em silêncio**.
+
+## Licença
+
+[MIT](LICENSE).
