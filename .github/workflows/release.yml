@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
 
+# Criar release é escrita. Sem isto, o GITHUB_TOKEN entra somente-leitura
+# (padrão em repositórios novos) e o electron-builder falha ao publicar.
+permissions:
+  contents: write
+
 jobs:
   release:
     runs-on: windows-latest
@@ -17,9 +22,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
+
+      # Antes de empacotar: versão quebrada publicada é pior que versão nenhuma,
+      # porque o updater a entrega sozinho para quem já tem o app instalado.
+      - name: Test
+        run: npm test
 
       - name: Build and publish
         run: npm run electron:publish
