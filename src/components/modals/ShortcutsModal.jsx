@@ -1,4 +1,4 @@
-import Modal from "./Modal.jsx";
+import Modal from "../ui/Modal.jsx";
 
 const ATALHOS = [
   { teclas: ["N"], acao: "Nova atividade" },

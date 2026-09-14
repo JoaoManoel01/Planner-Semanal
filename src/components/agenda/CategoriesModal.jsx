@@ -1,6 +1,6 @@
 import * as store from "../../store/agenda.js";
 import { IconPlus, IconTrash } from "../ui/Icon.jsx";
-import Modal from "./Modal.jsx";
+import Modal from "../ui/Modal.jsx";
 
 /** Paleta oficial — categorias não inventam cores fora do brandkit. */
 const PALETA = [

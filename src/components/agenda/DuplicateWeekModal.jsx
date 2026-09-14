@@ -1,7 +1,7 @@
 import * as store from "../../store/agenda.js";
 import { getWeekRange } from "../../domain/time.js";
 import { pedirConfirmacao, avisar } from "../ui/avisos.js";
-import Modal from "./Modal.jsx";
+import Modal from "../ui/Modal.jsx";
 
 /** Repete a estrutura de outra semana na semana atual (sem marcar como concluída). */
 export default function DuplicateWeekModal({ semanaAtual, onClose }) {

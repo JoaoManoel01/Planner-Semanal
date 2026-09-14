@@ -3,7 +3,7 @@ import * as store from "../../store/agenda.js";
 import { toMin, formatarHoras, DIAS_CURTOS } from "../../domain/time.js";
 import { IconTrash } from "../ui/Icon.jsx";
 import { pedirConfirmacao, avisar } from "../ui/avisos.js";
-import Modal from "./Modal.jsx";
+import Modal from "../ui/Modal.jsx";
 
 export default function ActivityModal({ estado, range, modal, onClose }) {
   const edicao = modal.blocoId ? store.localizarBloco(modal.blocoId) : null;

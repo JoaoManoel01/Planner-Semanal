@@ -2,10 +2,10 @@ import {
   IconChevronLeft, IconChevronRight, IconPlus, IconTag,
   IconSliders, IconDownload, IconUpload, IconKeyboard, IconCalendar, IconCopy
 } from "../ui/Icon.jsx";
-import BrandRow from "./BrandRow.jsx";
-import MenuFerramentas from "./MenuFerramentas.jsx";
+import BrandRow from "../layout/BrandRow.jsx";
+import MenuFerramentas from "../layout/MenuFerramentas.jsx";
 
-export default function AppHeader({
+export default function AgendaHeader({
   aba, onAba, range, status, onNavegar, onHoje, onNova, onNovoEvento,
   onCategorias, onPersonalizar, onExportar, onImportar, onDuplicar, onAtalhos
 }) {

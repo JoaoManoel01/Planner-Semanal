@@ -14,19 +14,19 @@ import { generateWeeklyInsights } from "./domain/insights.js";
 import SplashScreen from "./components/splash/SplashScreen.jsx";
 import CamadaAvisos from "./components/ui/CamadaAvisos.jsx";
 import { avisar } from "./components/ui/avisos.js";
-import AppHeader from "./components/layout/AppHeader.jsx";
-import WeeklyStatus from "./components/week/WeeklyStatus.jsx";
-import WeekContext from "./components/week/WeekContext.jsx";
-import CategoryBar from "./components/week/CategoryBar.jsx";
-import WeekGrid from "./components/week/WeekGrid.jsx";
-import WeekSummary from "./components/panels/WeekSummary.jsx";
-import WeekInsights from "./components/panels/WeekInsights.jsx";
-import ActivityModal from "./components/modals/ActivityModal.jsx";
-import EventModal from "./components/modals/EventModal.jsx";
-import CategoriesModal from "./components/modals/CategoriesModal.jsx";
+import AgendaHeader from "./components/agenda/AgendaHeader.jsx";
+import WeeklyStatus from "./components/agenda/WeeklyStatus.jsx";
+import WeekContext from "./components/agenda/WeekContext.jsx";
+import CategoryBar from "./components/agenda/CategoryBar.jsx";
+import WeekGrid from "./components/agenda/WeekGrid.jsx";
+import WeekSummary from "./components/agenda/WeekSummary.jsx";
+import WeekInsights from "./components/agenda/WeekInsights.jsx";
+import ActivityModal from "./components/agenda/ActivityModal.jsx";
+import EventModal from "./components/agenda/EventModal.jsx";
+import CategoriesModal from "./components/agenda/CategoriesModal.jsx";
 import PreferencesModal from "./components/modals/PreferencesModal.jsx";
 import ShortcutsModal from "./components/modals/ShortcutsModal.jsx";
-import DuplicateWeekModal from "./components/modals/DuplicateWeekModal.jsx";
+import DuplicateWeekModal from "./components/agenda/DuplicateWeekModal.jsx";
 import TreinosApp from "./components/treino/TreinosApp.jsx";
 import ProjetosApp from "./components/projeto/ProjetosApp.jsx";
 
@@ -205,7 +205,7 @@ export default function App() {
 
         {aba === "agenda" ? (
           <>
-            <AppHeader
+            <AgendaHeader
               aba={aba}
               onAba={setAba}
               range={range}

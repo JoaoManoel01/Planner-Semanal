@@ -1,6 +1,6 @@
 # ORBIT — Agenda Semanal
 
-Planner semanal local, focado em **ver a semana como um sistema**: compromissos por faixa horária, categorias, resumo de carga e leitura contextual. Roda no navegador (Vite) e como aplicativo desktop (Electron).
+Planner semanal local, focado em **ver a semana como um sistema**. Três módulos independentes: **Agenda** (o tempo passando), **Treinos** (progressão de cargas e peso corporal) e **Projetos** (cada atividade em profundidade, com prazos e tempo investido). Roda no navegador (Vite) e como aplicativo desktop (Electron).
 
 ## Features atuais
 
@@ -51,8 +51,28 @@ Planner semanal local, focado em **ver a semana como um sistema**: compromissos 
 - **Exportar / importar** backup em JSON.
 - **Repetir outra semana** na semana atual, copiando a estrutura de atividades.
 
+### Treinos
+
+- Plano semanal: escolha os dias de treino e adicione os exercícios com a carga de 100%.
+- Séries derivadas automaticamente: aquecimento + 60% + 80% + 100%.
+- Registro pós-treino do peso pego em cada exercício (reps opcionais e marcação de falha).
+- **Mapa corporal** frente/costas que acende cada grupo conforme o volume do dia ou da semana.
+- **Octógono de desempenho** por grupo muscular.
+- **Progressão** de carga e 1RM estimado por exercício ao longo das semanas.
+- **Linha do tempo semanal** com carga consolidada.
+- **Pesagem diária em jejum** com curva de peso e média móvel.
+
+### Projetos
+
+- Índice de projetos com estado, tempo investido e o prazo mais próximo.
+- **Workspace por projeto**: cada atividade tem o próprio espaço, isolado da semana.
+- **Marcos** com data — entregas, submissões, bancas — e aviso de atraso.
+- **Registro de trabalho**: data, tempo e o que avançou.
+- **Curva de investimento**: barras de ritmo semanal sobre a linha do acumulado.
+
 ### Experiência e aparência
 
+- Três módulos — Agenda, Treinos e Projetos — trocados por um controle segmentado no cabeçalho.
 - Tema **escuro/claro**, acento configurável e densidade da grade.
 - Sistema de ícones SVG inline (outline, 24×24, `stroke 1.5`).
 - Avisos discretos com **desfazer** e confirmações customizadas (no lugar de `alert`/`confirm`).
@@ -63,7 +83,7 @@ Planner semanal local, focado em **ver a semana como um sistema**: compromissos 
 
 - **React 18** + **Vite 6**
 - **CSS customizado com design tokens** centralizados em `src/styles/` — o Tailwind está instalado no setup do Vite, mas os estilos atuais são CSS puro (sem classes utilitárias do Tailwind)
-- **Electron** + **electron-builder** (build portable para Windows)
+- **Electron** + **electron-builder** (instalador NSIS para Windows, com atualização automática via GitHub Releases)
 - JavaScript (JSX), sem TypeScript neste momento
 
 ## Scripts
@@ -74,7 +94,7 @@ npm run dev          # roda no navegador (Vite)
 npm run build        # gera o build web em dist/
 npm run preview      # serve o build de produção localmente
 npm run electron:dev # roda como app Electron em desenvolvimento
-npm run electron:build # empacota o executável (release/)
+npm run electron:build # empacota o executável em %LOCALAPPDATA%/orbit-release (fora do OneDrive)
 npm run icon         # regenera os ícones do app
 ```
 
@@ -82,7 +102,7 @@ npm run icon         # regenera os ícones do app
 
 ```text
 .
-├── electron/            # camada desktop (janela, ambiente Electron)
+├── electron/            # camada desktop (janela, updater)
 ├── legacy/              # versão anterior em JS puro (referência)
 ├── scripts/             # utilitários (geração de ícones)
 ├── build/               # ícones do aplicativo
@@ -90,17 +110,20 @@ npm run icon         # regenera os ícones do app
     ├── App.jsx          # composição das telas e ações
     ├── main.jsx         # entrypoint React
     ├── index.css        # entrada dos estilos
-    ├── store/           # estado, ações e persistência
     ├── components/
-    │   ├── layout/      # cabeçalho e navegação
-    │   ├── week/        # grade, cards, filtros, status
-    │   ├── panels/      # resumo e leitura da semana
-    │   ├── modals/      # diálogos de edição e configuração
+    │   ├── agenda/      # módulo Agenda: grade, cards, resumo e diálogos da semana
+    │   ├── treino/      # módulo Treinos: plano, sessão, mapa corporal e progressão
+    │   ├── projeto/     # módulo Projetos: índice, workspace, marcos e curva
+    │   ├── layout/      # casca comum a todos os módulos
+    │   ├── modals/      # diálogos de aplicação (preferências, atalhos)
     │   ├── splash/      # tela de entrada
-    │   └── ui/          # ícones, avisos e confirmações
-    ├── domain/          # regras puras (tempo, semana, analytics, insights)
-    ├── hooks/           # hooks de relógio, atalhos e store
+    │   └── ui/          # primitivas: ícones, modal, gráfico, segmentado, avisos
+    ├── domain/          # regras puras (tempo, semana, insights, treinos, projetos)
+    ├── store/           # estado, ações e persistência — um store por módulo
+    ├── hooks/           # relógio, atalhos e assinatura dos stores
     └── styles/          # tokens e estilos por área
 ```
 
 A separação segue a direção `UI → store/ações → domain → persistência`: componentes apenas renderizam dados normalizados, as regras de negócio vivem em `domain/` e o armazenamento fica isolado em `store/`.
+
+Cada módulo é uma pasta em `components/`, com o próprio domínio e o próprio store. Os três não se conhecem: a agenda não lê treinos nem projetos, e vice-versa. O que eles compartilham vive em `ui/` e `layout/` — e só chega lá quando um segundo módulo passa a precisar.
