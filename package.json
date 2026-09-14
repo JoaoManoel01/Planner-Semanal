@@ -1,7 +1,7 @@
 {
   "name": "agenda-semanal",
   "productName": "ORBIT",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Agenda semanal local",
   "main": "electron/main.cjs",
   "private": true,
