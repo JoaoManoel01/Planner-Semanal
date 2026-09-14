@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require("electron");
+const { autoUpdater } = require("electron-updater");
 const path = require("path");
 
 const DEV_URL = "http://127.0.0.1:5173";
@@ -28,6 +29,11 @@ function createWindow() {
 
 app.whenReady().then(() => {
   createWindow();
+
+  if (app.isPackaged) {
+    autoUpdater.autoDownload = true;
+    autoUpdater.checkForUpdatesAndNotify();
+  }
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

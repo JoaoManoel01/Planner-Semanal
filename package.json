@@ -1,7 +1,7 @@
 {
   "name": "agenda-semanal",
   "productName": "ORBIT",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Agenda semanal local",
   "main": "electron/main.cjs",
   "private": true,
@@ -12,9 +12,11 @@
     "preview": "vite preview",
     "icon": "node scripts/generate-icon.mjs",
     "electron:dev": "concurrently -k \"vite --host 127.0.0.1 --port 5173\" \"wait-on http://127.0.0.1:5173 && electron electron/main.cjs\"",
-    "electron:build": "vite build && electron-builder"
+    "electron:build": "vite build && electron-builder -c.directories.output=%LOCALAPPDATA%/orbit-release",
+    "electron:publish": "vite build && electron-builder --publish always"
   },
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -41,11 +43,20 @@
       "electron/**",
       "package.json"
     ],
+    "publish": {
+      "provider": "github",
+      "owner": "JoaoManoel01",
+      "repo": "Planner-Semanal"
+    },
     "win": {
       "target": [
-        "portable"
+        "nsis"
       ],
       "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
     }
   }
 }
