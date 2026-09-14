@@ -36,3 +36,22 @@ jobs:
         run: npm run electron:publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # O electron-builder cria o release como rascunho por padrão, e reaproveita
+      # rascunho existente sem alterar o status. Rascunho não aparece em
+      # releases/latest/download — exatamente onde o updater busca o latest.yml.
+      # Este passo garante o estado final independente do caminho percorrido.
+      - name: Tirar do rascunho
+        run: gh release edit "${{ github.ref_name }}" --draft=false --latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Verificação de efeito, não de etapa: o passo anterior pode ficar verde
+      # e o arquivo continuar inacessível para quem vai baixar.
+      - name: Conferir que o updater enxerga
+        shell: bash
+        run: |
+          url="https://github.com/${{ github.repository }}/releases/latest/download/latest.yml"
+          codigo=$(curl -sL -o /dev/null -w "%{http_code}" "$url")
+          echo "latest.yml -> HTTP $codigo"
+          test "$codigo" = "200"
