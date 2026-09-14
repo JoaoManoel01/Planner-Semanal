@@ -8,7 +8,8 @@ const TEMAS = [
 const ACENTOS = [
   { id: "cyan", nome: "Cyan", token: "var(--color-brand-cyan)" },
   { id: "petrol", nome: "Petról", token: "var(--color-brand-petrol-light)" },
-  { id: "gelo", nome: "Gelo", token: "var(--color-text-primary)" }
+  { id: "gelo", nome: "Gelo", token: "var(--color-text-primary)" },
+  { id: "purpura", nome: "Púrpura", token: "var(--color-brand-purpura)" }
 ];
 
 const DENSIDADES = [

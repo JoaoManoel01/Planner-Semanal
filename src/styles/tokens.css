@@ -31,6 +31,8 @@
   --color-brand-petrol-light: #2e7c82;
   --color-brand-cyan: #21c7c4;
   --color-brand-cyan-soft: #143a3d;
+  --color-brand-purpura: #bd6fe8;
+  --color-brand-purpura-soft: #331843;
 
   /* Estados */
   --color-danger: #e0625f;
@@ -113,6 +115,35 @@
   --accent-contraste: var(--color-bg-void);
 }
 
+/**
+ * Púrpura — paleta completa, não só o acento.
+ * As superfícies ganham desvio violeta na mesma luminância do escuro padrão,
+ * então todo contraste já validado continua valendo.
+ * Vem antes do tema claro de propósito: no claro, o tema sobrescreve isto.
+ */
+:root[data-acento="purpura"] {
+  --accent: var(--color-brand-purpura);
+  --accent-soft: var(--color-brand-purpura-soft);
+  --accent-contraste: var(--color-bg-void);
+
+  --color-bg-void: #0b0810;
+  --color-bg-base: #100d16;
+  --color-surface-1: #16121d;
+  --color-surface-2: #1c1724;
+  --color-surface-3: #241e2d;
+
+  --color-border: #2c2537;
+  --color-border-strong: #392f47;
+  --color-border-faint: #211b2a;
+
+  --color-text-primary: #ede8f2;
+  --color-text-secondary: #a79bb3;
+  --color-text-muted: #6f6580;
+  --color-text-disabled: #4a425a;
+
+  --grid-column-quiet: rgba(8, 4, 14, 0.34);
+}
+
 :root[data-tema="claro"] {
   color-scheme: light;
 
@@ -133,6 +164,8 @@
 
   --color-brand-cyan: #0d9b98;
   --color-brand-cyan-soft: #dcf3f2;
+  --color-brand-purpura: #8b3fd4;
+  --color-brand-purpura-soft: #f2e6fb;
   --color-brand-petrol-light: #1d6169;
 
   --color-danger: #c94040;
