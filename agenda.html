@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agenda da semana</title>
+<link rel="stylesheet" href="agenda.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topo">
+    <div class="marca">
+      <h1>Agenda da semana</h1>
+      <p class="periodo" id="periodo"></p>
+    </div>
+
+    <aside class="progresso">
+      <div class="p-cabeca">
+        <span class="rotulo">Semana concluída</span>
+        <span class="valor" id="pct">0%</span>
+      </div>
+      <div class="barra"><i id="preenchimento"></i></div>
+      <div class="p-rodape">
+        <span>Blocos <b id="contagem">–</b></span>
+        <span>Inglês <b id="contagem-ingles">–</b></span>
+      </div>
+    </aside>
+  </header>
+
+  <div class="acoes">
+    <button type="button" id="btn-prev" class="btn">‹ Anterior</button>
+    <button type="button" id="btn-hoje" class="btn">Hoje</button>
+    <button type="button" id="btn-prox" class="btn">Próxima ›</button>
+    <button type="button" id="btn-nova" class="btn primario">+ Nova atividade</button>
+    <button type="button" id="btn-categorias" class="btn">Categorias</button>
+    <button type="button" id="btn-exportar" class="btn">Exportar</button>
+    <button type="button" id="btn-importar" class="btn">Importar</button>
+    <input type="file" id="input-importar" accept="application/json" hidden>
+    <span class="dica">Arraste os blocos para reagendar · duplo clique para editar</span>
+  </div>
+
+  <section class="lembretes" id="lembretes"></section>
+
+  <nav class="legenda" id="legenda"></nav>
+
+  <main class="quadro">
+    <div class="grade" id="grade"></div>
+  </main>
+
+  <section class="resumo" id="resumo"></section>
+
+  <section class="notas" id="notas"></section>
+
+</div>
+
+<!-- modal atividade -->
+<div class="overlay" id="overlay-atividade" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="titulo-atividade">
+    <h2 id="titulo-atividade">Nova atividade</h2>
+    <form id="form-atividade">
+      <input type="hidden" id="f-id">
+
+      <label>Dia
+        <select id="f-dia"></select>
+      </label>
+
+      <label>Nome
+        <input type="text" id="f-nome" maxlength="40" required>
+      </label>
+
+      <div class="linha-dupla">
+        <label>Início
+          <input type="time" id="f-ini" min="08:00" required>
+        </label>
+        <label>Fim
+          <input type="time" id="f-fim" min="08:00" required>
+        </label>
+      </div>
+
+      <label>Categoria
+        <select id="f-cat"></select>
+      </label>
+
+      <label>Nota (opcional)
+        <input type="text" id="f-nota" maxlength="80">
+      </label>
+
+      <div class="acoes-modal">
+        <button type="button" id="btn-excluir" class="btn perigo" hidden>Excluir</button>
+        <button type="button" class="btn" data-fechar>Cancelar</button>
+        <button type="submit" class="btn primario">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- modal categorias -->
+<div class="overlay" id="overlay-categorias" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Categorias">
+    <h2>Categorias</h2>
+    <ul class="lista-categorias" id="lista-categorias"></ul>
+    <button type="button" id="btn-add-cat" class="btn primario">+ Nova categoria</button>
+    <div class="acoes-modal">
+      <button type="button" class="btn" data-fechar>Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script src="agenda.js"></script>
+</body>
+</html>

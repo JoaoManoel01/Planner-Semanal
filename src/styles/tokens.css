@@ -1,0 +1,144 @@
+/**
+ * Design tokens — fonte única de verdade visual (brandkit.md §3).
+ * Componentes nunca escrevem hexadecimais.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Background */
+  --color-bg-void: #080b0d;
+  --color-bg-base: #0d1114;
+
+  /* Surfaces */
+  --color-surface-1: #13181c;
+  --color-surface-2: #181e22;
+  --color-surface-3: #1e252a;
+
+  /* Borders */
+  --color-border: #252d32;
+  --color-border-strong: #303a40;
+  --color-border-faint: #1b2226;
+
+  /* Text */
+  --color-text-primary: #e8edf0;
+  --color-text-secondary: #98a5ad;
+  --color-text-muted: #627078;
+  --color-text-disabled: #414b51;
+
+  /* Brand */
+  --color-brand-petrol: #16454c;
+  --color-brand-petrol-light: #2e7c82;
+  --color-brand-cyan: #21c7c4;
+  --color-brand-cyan-soft: #143a3d;
+
+  /* Estados */
+  --color-danger: #e0625f;
+  --color-danger-soft: #3a1e1e;
+
+  /* Categorias */
+  --category-stage: #37c98b;
+  --category-classes: #5b8def;
+  --category-english: #d56bae;
+  --category-gym: #a978f4;
+  --category-event: #65c98a;
+  --category-flexible: #87939a;
+  --category-pibic: #28bfd0;
+  --category-time: #55c7e8;
+
+  /* Tipografia */
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  --font-size-display: 28px;
+  --font-size-heading: 20px;
+  --font-size-title: 16px;
+  --font-size-body: 13px;
+  --font-size-small: 11px;
+  --font-size-micro: 10px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  --tracking-label: 0.09em;
+
+  /* Espaçamento */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* Raios */
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+
+  /* Elevação */
+  --shadow-none: none;
+  --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.18);
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.55);
+
+  /* Movimento (§28) */
+  --t-hover: 120ms;
+  --t-card: 160ms;
+  --t-modal: 200ms;
+  --t-week: 220ms;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  /* Acento — trocável pelas preferências, sempre a partir de tokens */
+  --accent: var(--color-brand-cyan);
+  --accent-soft: var(--color-brand-cyan-soft);
+  --accent-contraste: var(--color-bg-void);
+
+  /* Derivados de superfície */
+  --grid-line-hour: var(--color-border);
+  --grid-line-half: var(--color-border-faint);
+  --grid-column-quiet: rgba(4, 8, 10, 0.34);
+}
+
+:root[data-acento="petrol"] {
+  --accent: var(--color-brand-petrol-light);
+  --accent-soft: var(--color-brand-petrol);
+  --accent-contraste: var(--color-text-primary);
+}
+
+:root[data-acento="gelo"] {
+  --accent: var(--color-text-primary);
+  --accent-soft: var(--color-surface-3);
+  --accent-contraste: var(--color-bg-void);
+}
+
+:root[data-tema="claro"] {
+  color-scheme: light;
+
+  --color-bg-void: #eef1f4;
+  --color-bg-base: #f5f7fa;
+  --color-surface-1: #ffffff;
+  --color-surface-2: #f2f5f8;
+  --color-surface-3: #e8edf1;
+
+  --color-border: #dde3e9;
+  --color-border-strong: #c6ced4;
+  --color-border-faint: #e9edf1;
+
+  --color-text-primary: #12171b;
+  --color-text-secondary: #566069;
+  --color-text-muted: #7b858e;
+  --color-text-disabled: #aeb7be;
+
+  --color-brand-cyan: #0d9b98;
+  --color-brand-cyan-soft: #dcf3f2;
+  --color-brand-petrol-light: #1d6169;
+
+  --color-danger: #c94040;
+  --color-danger-soft: #fbe8e8;
+
+  --shadow-modal: 0 24px 64px rgba(16, 34, 40, 0.18);
+
+  --grid-column-quiet: rgba(18, 28, 34, 0.035);
+}
