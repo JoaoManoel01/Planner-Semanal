@@ -9,6 +9,7 @@ import {
   getWeekStartISO, deslocarISO, hojeISO, dataParaISO,
   getWeekRange, DIAS_SEMANA
 } from "../domain/time.js";
+import { lerEstado, escreverEstado } from "./persistencia.js";
 
 const CHAVE = "orbit:agenda:v4";
 const CHAVES_LEGADAS = ["agenda-semanal:v3", "agenda-semanal:v2"];
@@ -205,27 +206,29 @@ function migrarLegado(obj) {
   };
 }
 
-function carregar() {
-  try {
-    const atual = JSON.parse(localStorage.getItem(CHAVE));
-    if (atual?.semanas && atual?.semanaAtual) {
-      atual.categorias = normalizarCategorias(atual.categorias);
-      atual.eventos = Array.isArray(atual.eventos) ? atual.eventos : [];
-      if (!atual.semanas[atual.semanaAtual]) {
-        atual.semanas[atual.semanaAtual] = { dias: diasVazios() };
-      }
-      return atual;
-    }
-  } catch { /* estado corrompido: cai para o legado */ }
+function normalizarAtual(atual) {
+  if (!atual?.semanas || !atual?.semanaAtual) return null;
+  atual.categorias = normalizarCategorias(atual.categorias);
+  atual.eventos = Array.isArray(atual.eventos) ? atual.eventos : [];
+  if (!atual.semanas[atual.semanaAtual]) {
+    atual.semanas[atual.semanaAtual] = { dias: diasVazios() };
+  }
+  return atual;
+}
 
+/* Sem estado atual utilizável, ainda existe o caminho das chaves legadas. */
+function recuperarLegadoOuVazio() {
   for (const chave of CHAVES_LEGADAS) {
     try {
       const migrado = migrarLegado(JSON.parse(localStorage.getItem(chave)));
       if (migrado) return migrado;
     } catch { /* ignora formato inválido */ }
   }
-
   return estadoInicial();
+}
+
+function carregar() {
+  return lerEstado(CHAVE, normalizarAtual, recuperarLegadoOuVazio);
 }
 
 /* ── Store ─────────────────────────────────────────────── */
@@ -234,7 +237,7 @@ let ESTADO = carregar();
 const ouvintes = new Set();
 
 function salvar() {
-  try { localStorage.setItem(CHAVE, JSON.stringify(ESTADO)); } catch { /* cota cheia */ }
+  escreverEstado(CHAVE, ESTADO);
 }
 
 function confirmar() {

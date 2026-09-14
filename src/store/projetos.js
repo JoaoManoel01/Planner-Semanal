@@ -2,6 +2,9 @@
  * Store de projetos — mesmo padrão dos demais: singleton mutável + assinaturas.
  * Isolado de propósito: nada aqui é lido pela agenda, nada daqui escreve nela.
  */
+import { lerEstado, escreverEstado } from "./persistencia.js";
+import { COLUNAS_PADRAO } from "../domain/projetos.js";
+
 const CHAVE = "orbit:projetos:v1";
 
 const gerarId = p => `${p}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
@@ -11,18 +14,18 @@ function estadoInicial() {
 }
 
 function carregar() {
-  try {
-    const obj = JSON.parse(localStorage.getItem(CHAVE));
-    if (obj && obj.versao === 1 && Array.isArray(obj.projetos)) return obj;
-  } catch { /* estado corrompido: recomeça vazio */ }
-  return estadoInicial();
+  return lerEstado(
+    CHAVE,
+    obj => (obj?.versao === 1 && Array.isArray(obj.projetos) ? obj : null),
+    estadoInicial
+  );
 }
 
 let ESTADO = carregar();
 const ouvintes = new Set();
 
 function salvar() {
-  try { localStorage.setItem(CHAVE, JSON.stringify(ESTADO)); } catch { /* cota cheia */ }
+  escreverEstado(CHAVE, ESTADO);
 }
 
 function confirmar() {
@@ -52,7 +55,9 @@ export function criarProjeto(dados = {}) {
     estado: dados.estado || "ativo",
     criadoEm: new Date().toISOString(),
     marcos: [],
-    registros: []
+    registros: [],
+    notas: [],
+    quadro: { colunas: COLUNAS_PADRAO.map(c => ({ ...c })), cartoes: [] }
   };
   ESTADO.projetos.push(projeto);
   confirmar();
@@ -140,4 +145,104 @@ export function importarJSON(texto) {
   }
   ESTADO = obj;
   confirmar();
+}
+
+/* ── Quadro ──────────────────────────────────────────────────────── */
+
+function garantirQuadro(projeto) {
+  if (!projeto.quadro) projeto.quadro = { colunas: COLUNAS_PADRAO.map(c => ({ ...c })), cartoes: [] };
+  if (!Array.isArray(projeto.quadro.cartoes)) projeto.quadro.cartoes = [];
+  if (!projeto.quadro.colunas?.length) projeto.quadro.colunas = COLUNAS_PADRAO.map(c => ({ ...c }));
+  return projeto.quadro;
+}
+
+export function adicionarCartao(projetoId, { titulo, colunaId, marcoId, prazo } = {}) {
+  const projeto = getProjeto(projetoId);
+  if (!projeto) return null;
+
+  const quadro = garantirQuadro(projeto);
+  const coluna = colunaId || quadro.colunas[0].id;
+  const ordem = quadro.cartoes.filter(c => c.colunaId === coluna).length;
+
+  const cartao = {
+    id: gerarId("crt"),
+    colunaId: coluna,
+    titulo: (titulo || "Nova tarefa").trim(),
+    detalhe: "",
+    prazo: prazo || null,
+    marcoId: marcoId || null,
+    ordem
+  };
+  quadro.cartoes.push(cartao);
+  confirmar();
+  return cartao.id;
+}
+
+export function atualizarCartao(projetoId, cartaoId, patch) {
+  const cartao = getProjeto(projetoId)?.quadro?.cartoes.find(c => c.id === cartaoId);
+  if (!cartao) return;
+  Object.assign(cartao, patch);
+  confirmar();
+}
+
+/** Move para outra coluna, ou reordena dentro dela. `destino` pode ser o fim. */
+export function moverCartao(projetoId, cartaoId, colunaId, destino = Infinity) {
+  const projeto = getProjeto(projetoId);
+  const quadro = projeto && garantirQuadro(projeto);
+  const cartao = quadro?.cartoes.find(c => c.id === cartaoId);
+  if (!cartao) return;
+
+  const origem = cartao.colunaId;
+  cartao.colunaId = colunaId;
+
+  /* Reindexa as duas colunas afetadas para que `ordem` nunca tenha buraco. */
+  const reindexar = coluna => {
+    quadro.cartoes
+      .filter(c => c.colunaId === coluna && c.id !== cartaoId)
+      .sort((a, b) => a.ordem - b.ordem)
+      .forEach((c, i) => { c.ordem = i >= destino && coluna === colunaId ? i + 1 : i; });
+  };
+
+  reindexar(colunaId);
+  if (origem !== colunaId) reindexar(origem);
+  cartao.ordem = Math.min(destino, quadro.cartoes.filter(c => c.colunaId === colunaId).length - 1);
+
+  confirmar();
+}
+
+export function removerCartao(projetoId, cartaoId) {
+  const quadro = getProjeto(projetoId)?.quadro;
+  const i = quadro?.cartoes.findIndex(c => c.id === cartaoId) ?? -1;
+  if (i >= 0) { quadro.cartoes.splice(i, 1); confirmar(); }
+}
+
+/* ── Notas ───────────────────────────────────────────────────────── */
+
+export function adicionarNota(projetoId, { titulo } = {}) {
+  const projeto = getProjeto(projetoId);
+  if (!projeto) return null;
+  if (!Array.isArray(projeto.notas)) projeto.notas = [];
+
+  const nota = {
+    id: gerarId("nta"),
+    titulo: (titulo || "Nova nota").trim(),
+    corpo: "",
+    atualizadoEm: new Date().toISOString()
+  };
+  projeto.notas.unshift(nota);
+  confirmar();
+  return nota.id;
+}
+
+export function atualizarNota(projetoId, notaId, patch) {
+  const nota = getProjeto(projetoId)?.notas?.find(n => n.id === notaId);
+  if (!nota) return;
+  Object.assign(nota, patch, { atualizadoEm: new Date().toISOString() });
+  confirmar();
+}
+
+export function removerNota(projetoId, notaId) {
+  const projeto = getProjeto(projetoId);
+  const i = projeto?.notas?.findIndex(n => n.id === notaId) ?? -1;
+  if (i >= 0) { projeto.notas.splice(i, 1); confirmar(); }
 }

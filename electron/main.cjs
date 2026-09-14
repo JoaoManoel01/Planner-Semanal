@@ -1,6 +1,7 @@
 const { app, BrowserWindow } = require("electron");
 const { autoUpdater } = require("electron-updater");
 const path = require("path");
+const backup = require("./backup.cjs");
 
 const DEV_URL = "http://127.0.0.1:5173";
 
@@ -16,7 +17,8 @@ function createWindow() {
     icon: path.join(__dirname, "../build/icon.ico"),
     webPreferences: {
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      preload: path.join(__dirname, "preload.cjs")
     }
   });
 
@@ -28,6 +30,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  backup.registrar();
   createWindow();
 
   if (app.isPackaged) {

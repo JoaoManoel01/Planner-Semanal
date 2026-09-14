@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as store from "./store/agenda.js";
-import * as treinosStore from "./store/treinos.js";
-import * as projetosStore from "./store/projetos.js";
+import { aoFalhar } from "./store/persistencia.js";
+import { baixarBackup, restaurarBackup, backupDiario } from "./store/backup.js";
 import { useAgenda } from "./hooks/useAgenda.js";
 import { useNow, minutosDoDia } from "./hooks/useNow.js";
 import { useAtalhos } from "./hooks/useAtalhos.js";
@@ -56,6 +56,33 @@ export default function App() {
 
   const hoje = dataParaISO(agora);
   const semanaAtual = estado.semanaAtual;
+
+  /* ── durabilidade dos dados ────────────────────────── */
+
+  /* Falha de armazenamento não pode ser silenciosa: sem aviso, você trabalha
+     uma semana achando que gravou. */
+  useEffect(() => aoFalhar(falha => {
+    if (falha.tipo === "cota") {
+      avisar("Armazenamento cheio — exporte um backup e remova semanas antigas", {
+        tipo: "erro", duracao: 12000
+      });
+    } else if (falha.tipo === "corrompido") {
+      avisar("Um arquivo de dados estava ilegível e foi posto em quarentena, não apagado", {
+        tipo: "erro", duracao: 12000
+      });
+    } else {
+      avisar("Não foi possível gravar os dados neste navegador", { tipo: "erro", duracao: 12000 });
+    }
+  }), []);
+
+  /* Backup em disco uma vez por dia, quando rodando como aplicativo. */
+  useEffect(() => {
+    backupDiario().then(r => {
+      if (r && !r.ok) {
+        avisar("Backup automático falhou — exporte manualmente", { tipo: "erro", duracao: 8000 });
+      }
+    });
+  }, []);
 
   /* ── preferências ──────────────────────────────────── */
   useEffect(() => {
@@ -121,19 +148,7 @@ export default function App() {
   }, [transicao, semanaAtual]);
 
   function exportar() {
-    const backup = {
-      versaoBackup: 3,
-      agenda: store.getEstado(),
-      treinos: treinosStore.getEstado(),
-      projetos: projetosStore.getEstado()
-    };
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `orbit-${semanaAtual}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+    baixarBackup();
     avisar("Backup exportado");
   }
 
@@ -143,16 +158,8 @@ export default function App() {
     const leitor = new FileReader();
     leitor.onload = () => {
       try {
-        const obj = JSON.parse(leitor.result);
-        /* Versões antigas continuam válidas: o que o backup não traz fica como está. */
-        if (obj?.versaoBackup >= 2 && obj.agenda) {
-          store.importarJSON(JSON.stringify(obj.agenda));
-          if (obj.treinos) treinosStore.importarJSON(JSON.stringify(obj.treinos));
-          if (obj.projetos) projetosStore.importarJSON(JSON.stringify(obj.projetos));
-        } else {
-          store.importarJSON(leitor.result);
-        }
-        avisar("Dados importados");
+        const restaurados = restaurarBackup(leitor.result);
+        avisar(`Dados importados: ${restaurados.join(", ")}`);
       } catch {
         avisar("Arquivo inválido — use um backup exportado por esta agenda", { tipo: "erro", duracao: 5000 });
       }
@@ -195,6 +202,16 @@ export default function App() {
   }), [selecionado, range, status]);
 
   useAtalhos(atalhos, !dialogo && splashFechado && aba === "agenda");
+
+  /* Troca de módulo vale em qualquer aba — os atalhos acima são da agenda. */
+  const atalhosGlobais = useMemo(() => ({
+    1: () => setAba("agenda"),
+    2: () => setAba("treinos"),
+    3: () => setAba("projetos"),
+    "?": () => setDialogo({ tipo: "atalhos" })
+  }), []);
+
+  useAtalhos(atalhosGlobais, !dialogo && splashFechado);
 
   const dataPadraoEvento = range.dias.find(d => d.hoje)?.iso || range.inicioISO;
 

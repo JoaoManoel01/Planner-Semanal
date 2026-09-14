@@ -3,6 +3,7 @@
  * Mesmo padrão do store da agenda: singleton mutável + assinaturas.
  */
 import { GRUPOS, AQUECIMENTO_PADRAO } from "../domain/treinos.js";
+import { lerEstado, escreverEstado } from "./persistencia.js";
 
 const CHAVE = "orbit:treinos:v1";
 
@@ -13,20 +14,18 @@ function estadoInicial() {
 }
 
 function carregar() {
-  try {
-    const obj = JSON.parse(localStorage.getItem(CHAVE));
-    if (obj && obj.versao === 1 && obj.plano && Array.isArray(obj.sessoes) && Array.isArray(obj.pesagens)) {
-      return obj;
-    }
-  } catch { /* estado corrompido: recomeça vazio */ }
-  return estadoInicial();
+  return lerEstado(
+    CHAVE,
+    obj => (obj?.versao === 1 && obj.plano && Array.isArray(obj.sessoes) && Array.isArray(obj.pesagens) ? obj : null),
+    estadoInicial
+  );
 }
 
 let ESTADO = carregar();
 const ouvintes = new Set();
 
 function salvar() {
-  try { localStorage.setItem(CHAVE, JSON.stringify(ESTADO)); } catch { /* cota cheia */ }
+  escreverEstado(CHAVE, ESTADO);
 }
 
 function confirmar() {
