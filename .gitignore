@@ -4,3 +4,12 @@ release/
 .commandcode/
 *.log
 .DS_Store
+
+# Credenciais e ambiente — o repositório é público
+.env
+.env.*
+!.env.example
+.vercel/
+
+# Backups exportados pelo app: contêm todos os seus dados
+orbit-*.json
